@@ -1,0 +1,51 @@
+version: "3"
+services:
+  nginx:
+    restart: always
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports: 
+      - "80:80"
+    volumes:
+      - ./:/app
+    networks:
+      - internal
+  php:
+    restart: always
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    volumes:
+      - ./:/app
+    networks:
+      - internal
+  db:
+    container_name: db
+    image: mariadb:latest
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+    networks:
+      - internal
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+    depends_on:
+      - db
+    networks:
+      - internal
+volumes:
+  db:
+networks:
+  internal:
+    driver: bridge
